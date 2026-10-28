@@ -3,6 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "description": "Interactive 3D simulations of what happens inside the body during common illnesses (Three.js, WebGL).",
+  "homepage": "https://diegocp01.github.io/inside-illness-3d/",
   "type": "module",
   "repository": {
     "type": "git",

@@ -2,6 +2,8 @@
 
 Interactive 3D simulations that show what happens inside the body during twelve common illnesses — built entirely in code with Three.js / WebGL (no 3D model files).
 
+**Live demo:** https://diegocp01.github.io/inside-illness-3d/
+
 ![The twelve simulations](preview.jpg)
 
 - **Left panel (≈30%)**: pick an illness; it expands with a one-line explanation, a headline statistic, where it happens and key signs (tap *More* for tips and sources).
@@ -18,7 +20,7 @@ npm install
 npm run dev
 ```
 
-Then open the URL Vite prints (http://localhost:5173). `npm run build` writes a static site to `dist/` that can be hosted anywhere.
+Then open the URL Vite prints (http://localhost:5173). `npm run build` writes a static site to `dist/`; every push to `main` redeploys it to GitHub Pages via `.github/workflows/deploy.yml`.
 
 ## The illnesses
 
