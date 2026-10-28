@@ -43,7 +43,7 @@ export default function build() {
   for (const [z, y] of [[-0.8, -0.75], [1.05, -0.62]]) {
     const g = new THREE.Group();
     g.position.set(0, y, z);
-    const wall = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, W, 40, 1, true).rotateZ(Math.PI / 2), membrane({ color: '#ff6a5c', minAlpha: 0.18, maxAlpha: 0.85 }));
+    const wall = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, W, 40, 1, true).rotateZ(Math.PI / 2), membrane({ color: '#ff6a5c', minAlpha: 0.18, maxAlpha: 0.85, roughness: 0.45, clearcoat: 0.25 }));
     wall.renderOrder = 2;
     g.add(wall);
     const n = 46;
@@ -385,7 +385,7 @@ export default function build() {
       exposure: 0.95,
       envIntensity: 0.35,
       bloom: { strength: 0.12, threshold: 0.98, radius: 0.4 },
-      lights: { hemi: 0.35, sky: '#ffe9e4', ground: '#3a1414', key: 2.2, keyPos: [3, 9, 6], shadowSize: 6.5, rim: 0.9, rimColor: '#a5c8ff', rimPos: [-6, 4, -7], fill: 3, fillColor: '#ff8a7a', fillPos: [0, -0.5, 4], head: 0.25 },
+      lights: { hemi: 0.35, sky: '#ffe9e4', ground: '#3a1414', key: 2.2, keyPos: [3, 9, 6], shadowSize: 6.5, rim: 0.9, rimColor: '#a5c8ff', rimPos: [-6, 4, -7], fill: 1.5, fillColor: '#ff8a7a', fillPos: [0, -0.5, 4], head: 0.25 },
     },
     controls: { minDistance: 2, maxDistance: 22 },
     views: {

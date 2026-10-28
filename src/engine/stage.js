@@ -40,7 +40,7 @@ export class Stage {
     renderer.toneMapping = THREE.NeutralToneMapping;
     renderer.toneMappingExposure = 1;
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.shadowMap.type = THREE.PCFShadowMap;
     host.appendChild(renderer.domElement);
 
     this.scene = new THREE.Scene();
@@ -79,7 +79,8 @@ export class Stage {
     this.key.shadow.mapSize.set(2048, 2048);
     this.key.shadow.bias = -0.0004;
     this.key.shadow.normalBias = 0.02;
-    this.key.shadow.radius = 4;
+    // Keep the blur small: three's PCF uses screen-space noise, and a wide radius shimmers when the camera moves.
+    this.key.shadow.radius = 1;
     this.rim = new THREE.DirectionalLight('#9fc7ff', 1.2);
     this.fill = new THREE.PointLight('#ffb0a0', 0, 30, 1.5);
     // Soft "headlight" that follows the camera so cut faces never fall into darkness.
