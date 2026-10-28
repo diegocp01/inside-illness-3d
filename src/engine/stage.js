@@ -286,9 +286,10 @@ export class Stage {
       const d = l.def;
       let on = this.labelsVisible;
       if (on && d.when) on = d.when(this.sick, this.time);
-      if (on && d.near) {
+      const nearLimit = d.near ?? this.active.labelNear;
+      if (on && nearLimit) {
         const wp = l.obj.getWorldPosition(_v);
-        on = wp.distanceTo(camPos) < d.near;
+        on = wp.distanceTo(camPos) < nearLimit;
       }
       if (on && d.follow) d.follow(l.obj.position);
       if (on !== l.shown) {

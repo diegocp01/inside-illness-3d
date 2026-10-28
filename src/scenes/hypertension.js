@@ -3,6 +3,7 @@ import { tissue } from '../engine/materials.js';
 import { redCellGeometry, mergeGeometries } from '../engine/shapes.js';
 import { tubeLayer } from '../engine/tube.js';
 import { rng, smoothstep, lerp } from '../engine/noise.js';
+import { buildContext } from './context.js';
 
 // High blood pressure: a cut-open artery whose wall thickens and stiffens as pressure rises.
 export default function build() {
@@ -101,6 +102,12 @@ export default function build() {
   root.add(arrows);
   const cLow = new THREE.Color('#7ee0a0'), cHigh = new THREE.Color('#ff4d3d');
 
+  // ---------- Context: where in the body this close-up is ----------
+  const CTX_X = -40;
+  const ctx = buildContext('artery');
+  ctx.group.position.x = CTX_X;
+  root.add(ctx.group);
+
   // ---------- Labels ----------
   // Anchors sit on the upper cut face (theta = 0.62 rad: y = 0.81r, z = 0.58r).
   const onCut = (x, rad) => [x, 0.81 * rad, 0.585 * rad];
@@ -112,11 +119,13 @@ export default function build() {
     { text: 'Thick wall', at: onCut(4.0, 1.07), when: (s) => s > 0.6 },
     { text: 'Damage', at: [3.0, 0.05, -0.72], when: (s) => s > 0.75 },
   ];
+  labels.push(...ctx.labels);
 
   const dummy = new THREE.Object3D();
   const up = new THREE.Vector3(0, 1, 0), dir = new THREE.Vector3();
   const tc = new THREE.Color();
   function update(t, dt, s) {
+    ctx.update(t, s);
     U.uTime.value = t;
     U.uSick.value = s;
 
@@ -174,7 +183,9 @@ export default function build() {
       lights: { hemi: 0.3, sky: '#ffe6e0', ground: '#3a1010', key: 2.2, keyPos: [3, 7, 8], shadowSize: 7, rim: 1.6, rimColor: '#a8c8ff', rimPos: [-6, 3, -6], fill: 2.5, fillColor: '#ff7060', fillPos: [0, 0, 2.5] },
     },
     controls: { minDistance: 1.5, maxDistance: 18 },
+    labelNear: 26,
     views: {
+      context: { pos: [CTX_X + ctx.view.pos[0], ctx.view.pos[1], ctx.view.pos[2]], target: [CTX_X + ctx.view.target[0], ctx.view.target[1], ctx.view.target[2]] },
       overview: { pos: [4.6, 2.2, 9.6], target: [0, -0.1, 0] },
       close: { pos: [2.0, 0.8, 4.8], target: [0.6, -0.2, -0.2] },
       cut: { pos: [-9.6, 1.4, 4.6], target: [-5.0, -0.2, 0] },

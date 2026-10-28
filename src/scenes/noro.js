@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { tissue, glowPoints } from '../engine/materials.js';
 import { virusGeometry, displace } from '../engine/shapes.js';
 import { noise, rng, smoothstep, lerp } from '../engine/noise.js';
+import { buildContext } from './context.js';
 
 // Norovirus: the small-intestine lining — villi soak up water until the virus blunts them.
 export default function build() {
@@ -99,6 +100,12 @@ export default function build() {
   const vSeeds = Array.from({ length: VN }, () => ({ v: Math.floor(r() * villi.length), thr: 0.1 + r() * 0.4, from: new THREE.Vector3((r() - 0.5) * W, 2 + r() * 1.5, (r() - 0.5) * D), ph: r() * 6, rot: r() * 6 }));
   root.add(virus);
 
+  // ---------- Context: where in the body this close-up is ----------
+  const CTX_X = -40;
+  const ctx = buildContext('gut');
+  ctx.group.position.x = CTX_X;
+  root.add(ctx.group);
+
   // ---------- Labels ----------
   const lv = new THREE.Object3D(), lw = new THREE.Object3D(), lvir = new THREE.Object3D(), lb = new THREE.Object3D(), lout = new THREE.Object3D();
   root.add(lv, lw, lvir, lb, lout);
@@ -109,6 +116,7 @@ export default function build() {
     { text: 'Water out', parent: lout, when: (s) => s > 0.65 },
     { text: 'Virus', parent: lvir, when: (s) => s > 0.15 && s < 0.9 },
   ];
+  labels.push(...ctx.labels);
   const tipVillus = villi[Math.floor(villi.length * 0.55)];
 
   const dummy = new THREE.Object3D();
@@ -123,6 +131,7 @@ export default function build() {
   }
 
   function update(t, dt, s) {
+    ctx.update(t, s);
     // Villi sway gently and blunt as the infection takes hold.
     for (let i = 0; i < villi.length; i++) {
       const v = villi[i];
@@ -226,7 +235,9 @@ export default function build() {
       lights: { hemi: 0.4, sky: '#ffe6e0', ground: '#401818', key: 2.4, keyPos: [-3, 8, 5], shadowSize: 6, rim: 1.8, rimColor: '#9cc4ff', rimPos: [5, 3, -6], fill: 4, fillColor: '#ff9a88', fillPos: [0, 1, 4] },
     },
     controls: { minDistance: 1.5, maxDistance: 20 },
+    labelNear: 26,
     views: {
+      context: { pos: [CTX_X + ctx.view.pos[0], ctx.view.pos[1], ctx.view.pos[2]], target: [CTX_X + ctx.view.target[0], ctx.view.target[1], ctx.view.target[2]] },
       overview: { pos: [5.4, 3.8, 7.2], target: [0, 0.4, 0] },
       close: { pos: [1.2, 1.7, 2.9], target: [0.1, 0.7, 0.4] },
       wide: { pos: [7.5, 5.5, 9.5], target: [0, 0, 0] },

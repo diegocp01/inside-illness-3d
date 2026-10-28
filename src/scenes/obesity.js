@@ -3,6 +3,7 @@ import { tissue, membrane, glowPoints } from '../engine/materials.js';
 import { smoothSphere, displace, redCellGeometry } from '../engine/shapes.js';
 import { macrophageGeometry } from '../engine/cells.js';
 import { noise, rng, smoothstep, lerp } from '../engine/noise.js';
+import { buildContext } from './context.js';
 
 // Obesity: a cluster of fat cells that swell, get stressed and attract immune cells.
 export default function build() {
@@ -92,6 +93,12 @@ export default function build() {
   const sSeeds = Array.from({ length: SN }, () => ({ c: dying[Math.floor(r() * dying.length)], cap: Math.floor(r() * caps.length), ph: r(), u: r() }));
   root.add(sig);
 
+  // ---------- Context: where in the body this close-up is ----------
+  const CTX_X = -40;
+  const ctx = buildContext('fat');
+  ctx.group.position.x = CTX_X;
+  root.add(ctx.group);
+
   // ---------- Labels ----------
   const lc = cells.slice().sort((a, b) => b.p.z + b.p.x * 0.3 - (a.p.z + a.p.x * 0.3))[2];
   const lFat = new THREE.Object3D(), lNuc = new THREE.Object3D(), lMac = new THREE.Object3D(), lBig = new THREE.Object3D();
@@ -101,12 +108,14 @@ export default function build() {
     { text: 'Swollen fat cell', parent: lBig, when: (s) => s >= 0.45 },
     { text: 'Immune cells', parent: lMac, when: (s) => s > 0.78 },
   ];
+  labels.push(...ctx.labels);
 
   const dummy = new THREE.Object3D();
   const tc = new THREE.Color();
   const cGold = new THREE.Color('#f6c445'), cDying = new THREE.Color('#a8784a');
   const tmp = new THREE.Vector3();
   function update(t, dt, s) {
+    ctx.update(t, s);
     const grow = smoothstep(0.05, 0.75, s);
     const spread = 1 + grow * 0.42;
     const die = smoothstep(0.62, 0.95, s);
@@ -207,7 +216,9 @@ export default function build() {
       lights: { hemi: 0.45, sky: '#fff6e6', ground: '#3a2a1a', key: 2.4, keyPos: [4, 8, 6], shadowSize: 7, rim: 2.0, rimColor: '#a8c8ff', rimPos: [-6, 3, -6], fill: 0, head: 0.6 },
     },
     controls: { minDistance: 2, maxDistance: 26 },
+    labelNear: 26,
     views: {
+      context: { pos: [CTX_X + ctx.view.pos[0], ctx.view.pos[1], ctx.view.pos[2]], target: [CTX_X + ctx.view.target[0], ctx.view.target[1], ctx.view.target[2]] },
       overview: { pos: [6.5, 4.2, 10.5], target: [0, 0, 0] },
       close: { pos: [dying[0].p.x * 1.42 + 1.6, dying[0].p.y * 1.42 + 1.4, dying[0].p.z * 1.42 + 4.2], target: [dying[0].p.x * 1.42, dying[0].p.y * 1.42, dying[0].p.z * 1.42] },
       wide: { pos: [9, 6, 14], target: [0, 0, 0] },
