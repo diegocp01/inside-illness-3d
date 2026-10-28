@@ -231,8 +231,7 @@ export default function build() {
   root.add(lblWbc);
   // ---------- Context: a half head showing where this lining is ----------
   const HEAD_X = -40;
-  const nose = buildNoseHead();
-  nose.group.position.x = HEAD_X;
+  const nose = buildNoseHead(HEAD_X);
   root.add(nose.group);
 
   const near = 20;

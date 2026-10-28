@@ -288,6 +288,12 @@ window.addEventListener('popstate', () => {
   if (id && id !== current?.id && sceneLoaders[id]) select(id, { replaceHash: true });
 });
 
+// Dev-only hook for local debugging tools (*.local.js files are gitignored).
+if (import.meta.env.DEV) {
+  window.__app = { stage, select, built: () => currentBuilt };
+  import.meta.glob('./*.local.js', { eager: true });
+}
+
 renderList();
 const initial = location.hash.slice(1);
 select(sceneLoaders[initial] ? initial : 'cold', { replaceHash: true });
