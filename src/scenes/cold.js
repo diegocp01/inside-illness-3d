@@ -24,10 +24,10 @@ export default function build() {
   root.add(base);
 
   // Collagen fibres inside the connective tissue.
-  const fiberGeo = new THREE.CylinderGeometry(0.008, 0.008, 1, 5, 1);
-  const fibers = new THREE.InstancedMesh(fiberGeo, new THREE.MeshStandardMaterial({ color: '#d98b80', roughness: 0.8, envMapIntensity: 0.2 }), 140);
+  const fiberGeo = new THREE.CylinderGeometry(0.02, 0.02, 1, 6, 1);
+  const fibers = new THREE.InstancedMesh(fiberGeo, new THREE.MeshStandardMaterial({ color: '#d99085', roughness: 0.9, envMapIntensity: 0.2 }), 60);
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), v3 = new THREE.Vector3(), s3 = new THREE.Vector3();
-  for (let i = 0; i < 140; i++) {
+  for (let i = 0; i < 60; i++) {
     e.set(r() * Math.PI, r() * Math.PI, Math.PI / 2 + (r() - 0.5) * 0.8);
     q.setFromEuler(e);
     v3.set((r() - 0.5) * (W - 0.4), -0.15 - r() * (LP - 0.3), (r() - 0.5) * (D - 0.4));
@@ -87,10 +87,10 @@ export default function build() {
 
   // ---------- Cilia ----------
   const PER = 6;
-  const cilGeo = new THREE.CylinderGeometry(0.007, 0.009, 0.16, 5, 4);
+  const cilGeo = new THREE.CylinderGeometry(0.011, 0.014, 0.16, 5, 4);
   cilGeo.translate(0, 0.08, 0);
   const cilU = { uTime: { value: 0 }, uAmp: { value: 1 } };
-  const cilMat = new THREE.MeshStandardMaterial({ color: '#f2b8ad', roughness: 0.7 });
+  const cilMat = new THREE.MeshStandardMaterial({ color: '#eaaea3', roughness: 0.85 });
   cilMat.onBeforeCompile = (sh) => {
     Object.assign(sh.uniforms, cilU);
     sh.vertexShader = sh.vertexShader
@@ -385,7 +385,7 @@ export default function build() {
       exposure: 0.95,
       envIntensity: 0.35,
       bloom: { strength: 0.12, threshold: 0.98, radius: 0.4 },
-      lights: { hemi: 0.35, sky: '#ffe9e4', ground: '#3a1414', key: 2.2, keyPos: [3, 9, 6], shadowSize: 6.5, rim: 1.6, rimColor: '#a5c8ff', rimPos: [-6, 4, -7], fill: 3, fillColor: '#ff8a7a', fillPos: [0, -0.5, 4], head: 0.25 },
+      lights: { hemi: 0.35, sky: '#ffe9e4', ground: '#3a1414', key: 2.2, keyPos: [3, 9, 6], shadowSize: 6.5, rim: 0.9, rimColor: '#a5c8ff', rimPos: [-6, 4, -7], fill: 3, fillColor: '#ff8a7a', fillPos: [0, -0.5, 4], head: 0.25 },
     },
     controls: { minDistance: 2, maxDistance: 22 },
     views: {

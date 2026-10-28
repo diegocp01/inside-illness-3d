@@ -31,7 +31,7 @@ export default function build() {
 
   // ---------- Ligament fibres between root and bone ----------
   const FN = 70;
-  const fibers = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.004, 0.004, 1, 5), new THREE.MeshStandardMaterial({ color: '#ffd9d0', roughness: 0.6, emissive: '#ff9a8a', emissiveIntensity: 0.15 }), FN);
+  const fibers = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.011, 0.011, 1, 6), new THREE.MeshStandardMaterial({ color: '#ffd9d0', roughness: 0.6, emissive: '#ff9a8a', emissiveIntensity: 0.15 }), FN);
   const fSeeds = [];
   for (let i = 0; i < FN; i++) {
     const sgn = i % 2 ? 1 : -1;

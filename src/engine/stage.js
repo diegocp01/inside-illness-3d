@@ -13,7 +13,7 @@ const FinishShader = {
   uniforms: {
     tDiffuse: { value: null },
     uVignette: { value: 0.35 },
-    uGrain: { value: 0.025 },
+    uGrain: { value: 0.012 },
     uTime: { value: 0 },
   },
   vertexShader: /* glsl */ `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
@@ -26,7 +26,8 @@ const FinishShader = {
       vec2 d = vUv - 0.5;
       float v = smoothstep(0.85, 0.2, length(d * vec2(1.1, 1.0)));
       c.rgb *= mix(1.0 - uVignette, 1.0, v);
-      c.rgb += (hash(vUv * 1000.0 + uTime) - 0.5) * uGrain;
+      // Static grain: animated noise shimmers badly in screen recordings.
+      c.rgb += (hash(floor(gl_FragCoord.xy)) - 0.5) * uGrain;
       gl_FragColor = c;
     }`,
 };
