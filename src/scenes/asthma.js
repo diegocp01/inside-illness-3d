@@ -4,6 +4,7 @@ import { smoothSphere, displace } from '../engine/shapes.js';
 import { eosinophilGeometry } from '../engine/cells.js';
 import { tubeLayer } from '../engine/tube.js';
 import { noise, rng, smoothstep, lerp } from '../engine/noise.js';
+import { buildContext } from './context.js';
 
 // Asthma: a cut-open airway. In an attack the muscle squeezes, the lining swells and mucus clogs it.
 export default function build() {
@@ -102,6 +103,12 @@ export default function build() {
   const eSeeds = Array.from({ length: EN }, () => ({ x: (r() - 0.5) * (L - 1), a: Math.PI / 2 + 0.95 + r() * (Math.PI * 2 - 1.9), d: r(), thr: 0.2 + r() * 0.5, rot: r() * 6 }));
   root.add(eos);
 
+  // ---------- Context: where in the body this close-up is ----------
+  const CTX_X = -40;
+  const ctx = buildContext('airway');
+  ctx.group.position.x = CTX_X;
+  root.add(ctx.group);
+
   // ---------- Labels ----------
   const onCut = (x, rad) => [x, 0.78 * rad, 0.62 * rad];
   const labels = [
@@ -112,9 +119,11 @@ export default function build() {
     { text: 'Swelling', at: [2.2, -0.42, -0.15], when: (s) => s > 0.55 },
     { text: 'Mucus', at: [-3.0, -0.4, 0.1], when: (s) => s > 0.75 },
   ];
+  labels.push(...ctx.labels);
 
   const dummy = new THREE.Object3D();
   function update(t, dt, s) {
+    ctx.update(t, s);
     U.uTime.value = t;
     U.uSick.value = s;
     const q = squeezeJS(s);
@@ -178,7 +187,9 @@ export default function build() {
       lights: { hemi: 0.45, sky: '#f2eaff', ground: '#2a1520', key: 2.4, keyPos: [3, 8, 7], shadowSize: 7, rim: 1.8, rimColor: '#9fd0ff', rimPos: [-6, 3, -6], fill: 4, fillColor: '#ff9a9a', fillPos: [0, 0, 2.5] },
     },
     controls: { minDistance: 1.5, maxDistance: 18 },
+    labelNear: 26,
     views: {
+      context: { pos: [CTX_X + ctx.view.pos[0], ctx.view.pos[1], ctx.view.pos[2]], target: [CTX_X + ctx.view.target[0], ctx.view.target[1], ctx.view.target[2]] },
       overview: { pos: [4.6, 3.0, 8.4], target: [0, -0.2, 0] },
       close: { pos: [1.4, 0.5, 3.4], target: [0.4, -0.1, -0.1] },
       end: { pos: [8.4, 1.0, 2.0], target: [4.5, -0.1, 0] },

@@ -111,10 +111,24 @@ svg { display: block; }
 .stat-year { display: block; font-size: 11px; opacity: 0.8; margin-top: 3px; }
 .where { display: flex; gap: 12px; align-items: center; margin-bottom: 8px; }
 .where-name { font-weight: 600; font-size: 13.5px; margin-bottom: 6px; }
-.bodymap { width: 40px; height: 80px; flex: none; }
-.bm-body { fill: var(--side-line); stroke: var(--side-line); }
-.bm-hot { opacity: 0.35; transform-box: fill-box; transform-origin: center; animation: pulse 2s ease-in-out infinite; }
-@keyframes pulse { 0%, 100% { transform: scale(0.8); opacity: 0.45; } 50% { transform: scale(1.5); opacity: 0.1; } }
+.lf { display: block; --lf-body: rgba(255, 255, 255, 0.16); --lf-organ: rgba(255, 255, 255, 0.26); }
+.lf-small { width: 34px; height: 106px; flex: none; --lf-body: #e2e2e7; --lf-organ: #cdcdd4; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme='light']) .lf-small { --lf-body: #2c2c30; --lf-organ: #3d3d43; } }
+.lf-body { fill: var(--lf-body); }
+.lf-limb { fill: none; stroke: var(--lf-body); stroke-width: 9; stroke-linecap: round; }
+.lf-leg { stroke-width: 11; }
+.lf-eye { fill: var(--lf-organ); }
+.lf-organ { fill: var(--lf-organ); }
+.lf-hl { fill: var(--hl); }
+.lf-vessel { fill: none; stroke-width: 1.3; stroke-linecap: round; stroke-linejoin: round; }
+.lf-organ .lf-vessel { stroke: var(--lf-organ); }
+.lf-hl .lf-vessel { stroke: var(--hl); }
+.lf-line { fill: none; stroke: rgba(0, 0, 0, 0.28); stroke-width: 0.5; stroke-linecap: round; }
+.lf-loupe .lf-hl { filter: drop-shadow(0 0 1.5px var(--hl)); }
+.lf-mark { fill: none; stroke: var(--hl); stroke-width: 1.6; }
+.lf-conn { fill: none; stroke: rgba(255, 255, 255, 0.35); stroke-width: 1; }
+.lf-lens-bg { fill: rgba(12, 12, 16, 0.72); }
+.lf-lens { fill: none; stroke: rgba(255, 255, 255, 0.7); stroke-width: 2; }
 .more { font-size: 13px; color: var(--side-sub); }
 .more summary { cursor: pointer; font-weight: 600; font-size: 12.5px; color: var(--accent); list-style: none; padding: 4px 0; }
 .more summary::-webkit-details-marker { display: none; }
@@ -152,6 +166,7 @@ svg { display: block; }
 .hud-title > * { pointer-events: auto; }
 .hud-title h2 { font-family: var(--font-display); font-size: clamp(26px, 3.2vw, 40px); line-height: 1.05; margin: 4px 0 4px; letter-spacing: -0.025em; font-weight: 700; text-shadow: 0 2px 24px rgba(0, 0, 0, 0.5); }
 .hud-title p { margin: 0; font-size: 15px; color: var(--hud-sub); }
+.locator { width: 168px; margin-top: 14px; pointer-events: none; }
 .icon-btn.menu-btn { display: none; }
 
 .hud-controls { top: 22px; right: 26px; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
@@ -198,8 +213,6 @@ svg { display: block; }
 .story-progress { height: 2px; border-radius: 2px; background: rgba(255, 255, 255, 0.1); margin-top: 12px; overflow: hidden; }
 .story-progress span { display: block; height: 100%; width: 0; background: var(--tint); }
 
-.hint { position: absolute; left: 26px; bottom: 30px; font-size: 12px; color: var(--hud-sub); z-index: 2; pointer-events: none; transition: opacity 1s; max-width: 160px; line-height: 1.5; }
-.hint.gone { opacity: 0; }
 
 .loader { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 14px; z-index: 4; color: var(--hud-sub); font-size: 13px; pointer-events: none; opacity: 0; transition: opacity 0.3s; }
 .loader.on { opacity: 1; }
@@ -219,13 +232,13 @@ svg { display: block; }
 /* The 3D area adapts to its own width (container query), the sidebar to the window. */
 @container viewport (max-width: 1080px) {
   .slider { display: none; }
-  .hint { display: none; }
   .story { width: min(520px, calc(100% - 110px)); }
 }
 @container viewport (max-width: 760px) {
   .hud-title { top: 14px; left: 14px; max-width: calc(100% - 28px); }
   .hud-title h2 { font-size: 26px; }
   .hud-title p { font-size: 13px; }
+  .locator { width: 118px; margin-top: 8px; }
   .hud-controls { top: auto; bottom: 178px; right: 14px; left: 14px; align-items: stretch; flex-direction: row; justify-content: space-between; gap: 8px; }
   .segmented { min-width: 0; flex: 1; }
   .segmented button { padding: 0 8px; font-size: 13px; }

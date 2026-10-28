@@ -20,10 +20,12 @@ export const illnesses = [
     facts: ['Rhinoviruses cause roughly 30–50% of colds.', 'Adults catch about 2–3 colds a year.'],
     sickLabel: 'With a cold',
     steps: [
-      { title: 'Healthy nose', text: 'Tiny hairs (cilia) sweep sticky mucus and germs away.', sick: 0, view: 'overview' },
+      { title: 'Inside the nose', text: 'The glowing square marks the lining we zoom into.', sick: 0, view: 'head' },
+      { title: 'Healthy lining', text: 'Tiny hairs (cilia) sweep sticky mucus and germs away.', sick: 0, view: 'overview' },
       { title: 'Virus lands', text: 'Rhinoviruses latch onto lining cells and get inside.', sick: 0.3, view: 'close' },
       { title: 'Stuffy nose', text: 'Blood vessels widen and leak, so the lining swells.', sick: 0.6, view: 'vessel' },
       { title: 'Runny nose', text: 'Extra mucus flushes the virus out.', sick: 1, view: 'overview' },
+      { title: 'Whole nose', text: 'Swollen lining blocks the airway: a stuffy nose.', sick: 1, view: 'head' },
       { title: 'Recovery', text: 'About a week later, it’s back to normal.', sick: 0, view: 'wide' },
     ],
     readout: (s) => ({ label: 'Stage', value: s < 0.15 ? 'Healthy' : s < 0.45 ? 'Day 1' : s < 0.8 ? 'Day 2' : 'Peak', tone: s < 0.15 ? 'good' : s < 0.6 ? 'warn' : 'bad' }),
@@ -49,10 +51,12 @@ export const illnesses = [
     facts: ['About 1 in 5 cases of gastroenteritis is norovirus.', 'Soap and water beat hand gel against it.'],
     sickLabel: 'With norovirus',
     steps: [
+      { title: 'Where it is', text: 'The glowing square marks the gut lining we zoom into.', sick: 0, view: 'context' },
       { title: 'Healthy gut', text: 'Tiny fingers (villi) soak up water and food.', sick: 0, view: 'overview' },
       { title: 'Virus arrives', text: 'Norovirus sticks to the tips of the villi.', sick: 0.3, view: 'close' },
       { title: 'Villi shrink', text: 'Infected cells die and the villi flatten.', sick: 0.7, view: 'close' },
       { title: 'Water rushes out', text: 'Water leaks back into the gut: diarrhoea.', sick: 1, view: 'overview' },
+      { title: 'Whole gut', text: 'The inflamed intestine can’t hold on to water.', sick: 1, view: 'context' },
       { title: 'Regrowth', text: 'The lining grows back in a few days.', sick: 0, view: 'wide' },
     ],
     readout: (s) => ({ label: 'Water', value: s < 0.35 ? 'Absorbed' : s < 0.7 ? 'Less' : 'Leaking', tone: s < 0.35 ? 'good' : s < 0.7 ? 'warn' : 'bad' }),
@@ -139,10 +143,12 @@ export const illnesses = [
     facts: ['Lack of iron is the biggest cause of anaemia.', 'Red cells need iron to carry oxygen.'],
     sickLabel: 'With anaemia',
     steps: [
+      { title: 'Where it is', text: 'We zoom into a blood vessel in the arm.', sick: 0, view: 'context' },
       { title: 'Red cells', text: 'Blood is packed with dimpled red cells.', sick: 0, view: 'overview' },
       { title: 'Oxygen delivery', text: 'Red cells carry oxygen to the body.', sick: 0, view: 'tissue' },
       { title: 'Low iron', text: 'Without iron, new red cells come out wrong.', sick: 0.5, view: 'close' },
       { title: 'Pale cells', text: 'Fewer, paler cells: less oxygen, more tiredness.', sick: 1, view: 'tissue' },
+      { title: 'Whole body', text: 'Pale blood reaches every part of the body.', sick: 1, view: 'context' },
       { title: 'Iron refill', text: 'With iron back, healthy cells return.', sick: 0.1, view: 'overview' },
     ],
     readout: (s) => {
@@ -171,10 +177,12 @@ export const illnesses = [
     facts: ['High means 140/90 or more.', 'About 9 in 10 cases have no single cause.'],
     sickLabel: 'With hypertension',
     steps: [
+      { title: 'Where it is', text: 'We zoom into an arm artery, where pressure is measured.', sick: 0, view: 'context' },
       { title: 'Healthy artery', text: 'Each heartbeat stretches the springy wall.', sick: 0, view: 'overview' },
       { title: 'Pressure', text: 'The arrows show blood pushing on the wall.', sick: 0, view: 'close' },
       { title: 'Too much push', text: 'Pressure stays at 140/90 or higher.', sick: 0.55, view: 'close' },
       { title: 'Stiff walls', text: 'The wall thickens and stiffens.', sick: 1, view: 'cut' },
+      { title: 'Whole body', text: 'The heart pumps harder through stiff arteries.', sick: 1, view: 'context' },
       { title: 'Treatment', text: 'Lifestyle and medicine bring it down.', sick: 0.2, view: 'overview' },
     ],
     readout: (s) => {
@@ -235,11 +243,12 @@ export const illnesses = [
     facts: ['Genes, sleep, stress and environment all play a part.', 'Swollen fat cells attract immune cells.'],
     sickLabel: 'With obesity',
     steps: [
+      { title: 'Where it is', text: 'We zoom into fat tissue in the belly.', sick: 0, view: 'context' },
       { title: 'Fat tissue', text: 'Fat cells store energy in a golden droplet.', sick: 0, view: 'overview' },
       { title: 'Cells swell', text: 'Extra energy makes fat cells grow bigger.', sick: 0.5, view: 'overview' },
       { title: 'Stressed cells', text: 'Overstuffed cells get squeezed; some die.', sick: 0.8, view: 'close' },
       { title: 'Inflammation', text: 'Immune cells surround them and send alarms.', sick: 1, view: 'close' },
-      { title: 'Body-wide risk', text: 'This raises the risk of diabetes and heart disease.', sick: 1, view: 'wide' },
+      { title: 'Whole body', text: 'Fat builds up around the belly and organs.', sick: 1, view: 'context' },
     ],
     readout: (s) => {
       const bmi = 22 + s * 13;
@@ -299,10 +308,12 @@ export const illnesses = [
     facts: ['Diabetes: fasting sugar of 126 mg/dL (7.0 mmol/L) or more.', 'Many people have no symptoms.'],
     sickLabel: 'With diabetes',
     steps: [
+      { title: 'Where it is', text: 'We zoom into a muscle cell in the arm.', sick: 0, view: 'context' },
       { title: 'Sugar is fuel', text: 'Sugar (gold hexagons) travels in the blood.', sick: 0, view: 'overview' },
       { title: 'Insulin key', text: 'Insulin (blue key) fits the lock on the cell.', sick: 0, view: 'close' },
       { title: 'Doors open', text: 'The door opens and sugar goes in.', sick: 0, view: 'close' },
       { title: 'Stuck locks', text: 'Locks stop responding, so few doors open.', sick: 1, view: 'close' },
+      { title: 'Whole body', text: 'Sugary blood reaches every organ.', sick: 1, view: 'context' },
       { title: 'Sugar piles up', text: 'Over years, high sugar damages vessels and nerves.', sick: 1, view: 'overview' },
     ],
     readout: (s) => {
@@ -331,10 +342,12 @@ export const illnesses = [
     facts: ['Triggers: pollen, dust, smoke, pets, cold air, colds.'],
     sickLabel: 'Asthma attack',
     steps: [
+      { title: 'Where it is', text: 'We zoom into a small airway in the lungs.', sick: 0, view: 'context' },
       { title: 'Open airway', text: 'Air flows freely through a wide tube.', sick: 0, view: 'overview' },
       { title: 'Trigger', text: 'Pollen, dust or smoke irritates the lining.', sick: 0.3, view: 'close' },
       { title: 'Squeeze', text: 'The muscle tightens and the lining swells.', sick: 0.65, view: 'end' },
       { title: 'Mucus plugs', text: 'Mucus clogs the tube — wheezing.', sick: 1, view: 'end' },
+      { title: 'Whole lungs', text: 'Many airways narrow at once, so breathing is hard.', sick: 1, view: 'context' },
       { title: 'Inhaler', text: 'A reliever inhaler relaxes the muscle.', sick: 0.2, view: 'overview' },
     ],
     readout: (s) => {

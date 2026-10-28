@@ -3,6 +3,7 @@ import { tissue, membrane, glowPoints } from '../engine/materials.js';
 import { redCellGeometry, smoothSphere, displace } from '../engine/shapes.js';
 import { tubeLayer } from '../engine/tube.js';
 import { noise, rng, smoothstep, lerp } from '../engine/noise.js';
+import { buildContext } from './context.js';
 
 // Iron-deficiency anaemia: a cut-open blood vessel full of red cells delivering oxygen to body cells.
 export default function build() {
@@ -114,6 +115,12 @@ export default function build() {
   const oSeeds = Array.from({ length: ON }, () => ({ c: Math.floor(r() * CN), ph: r(), sp: 0.22 + r() * 0.15, a: (r() - 0.5) * 1.6, k: r() }));
   root.add(o2);
 
+  // ---------- Context: where in the body this close-up is ----------
+  const CTX_X = -40;
+  const ctx = buildContext('blood');
+  ctx.group.position.x = CTX_X;
+  root.add(ctx.group);
+
   // ---------- Labels ----------
   const lr = new THREE.Object3D(), lo = new THREE.Object3D();
   root.add(lr, lo);
@@ -124,10 +131,12 @@ export default function build() {
     { text: 'Body cells', at: [2.4, -2.1, 0.6], when: (s) => s < 0.6 },
     { text: 'Tired cells', at: [2.4, -2.1, 0.6], when: (s) => s >= 0.6 },
   ];
+  labels.push(...ctx.labels);
 
   const tc = new THREE.Color();
   const q = new THREE.Quaternion();
   function update(t, dt, s) {
+    ctx.update(t, s);
     U.uTime.value = t;
     U.uSick.value = s;
     rbcU.uPallor.value = lerp(0.18, 0.6, s);
@@ -221,7 +230,9 @@ export default function build() {
       lights: { hemi: 0.45, sky: '#ffe2dc', ground: '#3a1010', key: 2.3, keyPos: [2, 8, 7], shadowSize: 8, rim: 1.6, rimColor: '#ffb0a0', rimPos: [-6, 2, -6], fill: 5, fillColor: '#ff6a5a', fillPos: [0, 0, 3] },
     },
     controls: { minDistance: 1.5, maxDistance: 18 },
+    labelNear: 26,
     views: {
+      context: { pos: [CTX_X + ctx.view.pos[0], ctx.view.pos[1], ctx.view.pos[2]], target: [CTX_X + ctx.view.target[0], ctx.view.target[1], ctx.view.target[2]] },
       overview: { pos: [3.4, 0.9, 8.6], target: [0, -0.9, 0] },
       tissue: { pos: [1.8, -0.9, 5.4], target: [0.4, -1.9, 0] },
       close: { pos: [0.9, 0.35, 2.7], target: [0.4, 0, 0] },

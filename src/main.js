@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { Stage } from './engine/stage.js';
 import { illnesses } from './data/illnesses.js';
 import { icons } from './ui/icons.js';
-import { bodyMap } from './ui/bodymap.js';
+import { bodyFigure, locator } from './ui/locator.js';
 
 const sceneLoaders = {
   cold: () => import('./scenes/cold.js'),
@@ -72,7 +72,7 @@ function itemHTML(d) {
     <div class="detail"><div class="detail-inner"><div class="detail-body">
       <p class="what">${d.what}</p>
       <div class="stat"><div class="stat-num" style="color:${d.color}">${d.stat.value}</div><div class="stat-label">${d.stat.label}<span class="stat-year">${d.stat.year}</span></div></div>
-      <div class="where">${bodyMap(d.region, d.color)}<div><div class="where-name">${d.where}</div><div class="signs">${d.signs.map((s) => `<span class="sign">${s}</span>`).join('')}</div></div></div>
+      <div class="where">${bodyFigure(d.region, d.color)}<div><div class="where-name">${d.where}</div><div class="signs">${d.signs.map((s) => `<span class="sign">${s}</span>`).join('')}</div></div></div>
       <details class="more"><summary>More</summary>
         <p class="helps">${d.helps}</p>
         <ul class="facts">${d.facts.map((f) => `<li>${f}</li>`).join('')}</ul>
@@ -126,6 +126,7 @@ async function select(id, { replaceHash = false } = {}) {
   document.documentElement.style.setProperty('--tint', d.color);
   $('#title').textContent = d.name;
   $('#subtitle').textContent = d.specific;
+  $('#locator').innerHTML = locator(d.region, d.color);
   $('#seg-sick').textContent = d.sickLabel;
   document.title = `${d.name} · Inside Illness`;
   $('#step-title').textContent = d.steps[0].title;
@@ -249,9 +250,6 @@ window.addEventListener('keydown', (e) => {
   else if (e.key.toLowerCase() === 'r') toggleRotate();
 });
 
-// Hide the gesture hint after the first interaction.
-stage.renderer.domElement.addEventListener('pointerdown', () => $('#hint').classList.add('gone'), { once: true });
-
 // ---------- Per-frame UI sync ----------
 let lastRO = '';
 const ro = $('#readout');
@@ -289,6 +287,12 @@ window.addEventListener('popstate', () => {
   const id = location.hash.slice(1);
   if (id && id !== current?.id && sceneLoaders[id]) select(id, { replaceHash: true });
 });
+
+// Dev-only hook for local debugging tools (*.local.js files are gitignored).
+if (import.meta.env.DEV) {
+  window.__app = { stage, select, built: () => currentBuilt };
+  import.meta.glob('./*.local.js', { eager: true });
+}
 
 renderList();
 const initial = location.hash.slice(1);

@@ -13,7 +13,7 @@ const FinishShader = {
   uniforms: {
     tDiffuse: { value: null },
     uVignette: { value: 0.35 },
-    uGrain: { value: 0.025 },
+    uGrain: { value: 0.012 },
     uTime: { value: 0 },
   },
   vertexShader: /* glsl */ `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
@@ -26,7 +26,8 @@ const FinishShader = {
       vec2 d = vUv - 0.5;
       float v = smoothstep(0.85, 0.2, length(d * vec2(1.1, 1.0)));
       c.rgb *= mix(1.0 - uVignette, 1.0, v);
-      c.rgb += (hash(vUv * 1000.0 + uTime) - 0.5) * uGrain;
+      // Static grain: animated noise shimmers badly in screen recordings.
+      c.rgb += (hash(floor(gl_FragCoord.xy)) - 0.5) * uGrain;
       gl_FragColor = c;
     }`,
 };
@@ -38,8 +39,9 @@ export class Stage {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
     renderer.toneMapping = THREE.NeutralToneMapping;
     renderer.toneMappingExposure = 1;
+    renderer.localClippingEnabled = true;
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.shadowMap.type = THREE.PCFShadowMap;
     host.appendChild(renderer.domElement);
 
     this.scene = new THREE.Scene();
@@ -51,7 +53,7 @@ export class Stage {
     this.scene.environment = this.envs.body;
     this.scene.environmentIntensity = 0.8;
 
-    this.camera = new THREE.PerspectiveCamera(32, 1, 0.02, 400);
+    this.camera = new THREE.PerspectiveCamera(32, 1, 0.06, 400);
     this.camera.position.set(0, 1, 8);
 
     const controls = (this.controls = new OrbitControls(this.camera, renderer.domElement));
@@ -78,7 +80,8 @@ export class Stage {
     this.key.shadow.mapSize.set(2048, 2048);
     this.key.shadow.bias = -0.0004;
     this.key.shadow.normalBias = 0.02;
-    this.key.shadow.radius = 4;
+    // Keep the blur small: three's PCF uses screen-space noise, and a wide radius shimmers when the camera moves.
+    this.key.shadow.radius = 1;
     this.rim = new THREE.DirectionalLight('#9fc7ff', 1.2);
     this.fill = new THREE.PointLight('#ffb0a0', 0, 30, 1.5);
     // Soft "headlight" that follows the camera so cut faces never fall into darkness.
@@ -284,9 +287,10 @@ export class Stage {
       const d = l.def;
       let on = this.labelsVisible;
       if (on && d.when) on = d.when(this.sick, this.time);
-      if (on && d.near) {
+      const nearLimit = d.near ?? this.active.labelNear;
+      if (on && nearLimit) {
         const wp = l.obj.getWorldPosition(_v);
-        on = wp.distanceTo(camPos) < d.near;
+        on = wp.distanceTo(camPos) < nearLimit;
       }
       if (on && d.follow) d.follow(l.obj.position);
       if (on !== l.shown) {

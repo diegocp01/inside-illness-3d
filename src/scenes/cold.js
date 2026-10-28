@@ -2,7 +2,8 @@ import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { tissue, membrane, glowPoints } from '../engine/materials.js';
 import { virusGeometry, whiteCellGeometry, redCellGeometry, smoothSphere } from '../engine/shapes.js';
-import { noise, rng, smoothstep, lerp, clamp } from '../engine/noise.js';
+import { noise, rng, smoothstep, lerp } from '../engine/noise.js';
+import { buildNoseHead } from './noseHead.js';
 
 // Common cold: a slab of nasal lining — cilia, mucus, lining cells, and blood vessels beneath.
 export default function build() {
@@ -19,15 +20,15 @@ export default function build() {
   root.add(lp);
   // Base plate so the slab reads as a solid specimen.
   const base = new THREE.Mesh(new RoundedBoxGeometry(W + 0.1, 0.12, D + 0.1, 2, 0.05), tissue({ color: '#9a4a48', roughness: 0.6, clearcoat: 0.2 }));
-  base.position.y = -LP - 0.06;
+  base.position.y = -LP - 0.075; // top sits just below the tissue block, never in the same plane
   base.receiveShadow = true;
   root.add(base);
 
   // Collagen fibres inside the connective tissue.
-  const fiberGeo = new THREE.CylinderGeometry(0.008, 0.008, 1, 5, 1);
-  const fibers = new THREE.InstancedMesh(fiberGeo, new THREE.MeshStandardMaterial({ color: '#d98b80', roughness: 0.8, envMapIntensity: 0.2 }), 140);
+  const fiberGeo = new THREE.CylinderGeometry(0.02, 0.02, 1, 6, 1);
+  const fibers = new THREE.InstancedMesh(fiberGeo, new THREE.MeshStandardMaterial({ color: '#d99085', roughness: 0.9, envMapIntensity: 0.2 }), 60);
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), v3 = new THREE.Vector3(), s3 = new THREE.Vector3();
-  for (let i = 0; i < 140; i++) {
+  for (let i = 0; i < 60; i++) {
     e.set(r() * Math.PI, r() * Math.PI, Math.PI / 2 + (r() - 0.5) * 0.8);
     q.setFromEuler(e);
     v3.set((r() - 0.5) * (W - 0.4), -0.15 - r() * (LP - 0.3), (r() - 0.5) * (D - 0.4));
@@ -43,7 +44,7 @@ export default function build() {
   for (const [z, y] of [[-0.8, -0.75], [1.05, -0.62]]) {
     const g = new THREE.Group();
     g.position.set(0, y, z);
-    const wall = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, W, 40, 1, true).rotateZ(Math.PI / 2), membrane({ color: '#ff6a5c', minAlpha: 0.18, maxAlpha: 0.85 }));
+    const wall = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, W, 40, 1, true).rotateZ(Math.PI / 2), membrane({ color: '#ff6a5c', minAlpha: 0.18, maxAlpha: 0.85, roughness: 0.45, clearcoat: 0.25 }));
     wall.renderOrder = 2;
     g.add(wall);
     const n = 46;
@@ -63,7 +64,7 @@ export default function build() {
   const NX = 32, NZ = 16;
   const pitch = W / NX;
   const cellGeo = new RoundedBoxGeometry(pitch * 0.9, cellH, pitch * 0.9, 2, 0.05);
-  cellGeo.translate(0, cellH / 2, 0);
+  cellGeo.translate(0, cellH / 2 + 0.006, 0); // tiny lift so cell bottoms don't share a plane with the tissue top
   const cellMat = tissue({ color: '#ffffff', sheen: '#ffd0c8', roughness: 0.42, clearcoat: 0.3, normal: 'organic', normalScale: 0.25 });
   const cells = new THREE.InstancedMesh(cellGeo, cellMat, NX * NZ);
   cells.castShadow = true;
@@ -87,10 +88,10 @@ export default function build() {
 
   // ---------- Cilia ----------
   const PER = 6;
-  const cilGeo = new THREE.CylinderGeometry(0.007, 0.009, 0.16, 5, 4);
+  const cilGeo = new THREE.CylinderGeometry(0.011, 0.014, 0.16, 5, 4);
   cilGeo.translate(0, 0.08, 0);
   const cilU = { uTime: { value: 0 }, uAmp: { value: 1 } };
-  const cilMat = new THREE.MeshStandardMaterial({ color: '#f2b8ad', roughness: 0.7 });
+  const cilMat = new THREE.MeshStandardMaterial({ color: '#eaaea3', roughness: 0.85 });
   cilMat.onBeforeCompile = (sh) => {
     Object.assign(sh.uniforms, cilU);
     sh.vertexShader = sh.vertexShader
@@ -228,18 +229,28 @@ export default function build() {
   const lblVirus = new THREE.Object3D(), lblWbc = new THREE.Object3D(), lblInf = new THREE.Object3D(), lblMucus = new THREE.Object3D();
   upper.add(lblVirus, lblInf, lblMucus);
   root.add(lblWbc);
+  // ---------- Context: a half head showing where this lining is ----------
+  const HEAD_X = -40;
+  const nose = buildNoseHead(HEAD_X);
+  root.add(nose.group);
+
+  const near = 20;
   const labels = [
-    { text: 'Mucus', parent: lblMucus },
-    { text: 'Cilia', at: [2.6, cellH + 0.16, D / 2], parent: upper },
-    { text: 'Vessel', at: [2.2, -0.62 + 0.18, 1.05], when: (s) => s < 0.5 },
-    { text: 'Swollen vessel', at: [2.2, -0.62 + 0.3, 1.05], when: (s) => s >= 0.5 },
-    { text: 'Virus', parent: lblVirus, when: (s) => s > 0.2 && s < 0.95 },
-    { text: 'White cells', parent: lblWbc, when: (s) => s > 0.7 },
+    { text: 'Mucus', parent: lblMucus, near },
+    { text: 'Cilia', at: [2.6, cellH + 0.16, D / 2], parent: upper, near },
+    { text: 'Vessel', at: [2.2, -0.62 + 0.18, 1.05], when: (s) => s < 0.5, near },
+    { text: 'Swollen vessel', at: [2.2, -0.62 + 0.3, 1.05], when: (s) => s >= 0.5, near },
+    { text: 'Virus', parent: lblVirus, when: (s) => s > 0.2 && s < 0.95, near },
+    { text: 'White cells', parent: lblWbc, when: (s) => s > 0.7, near },
+    { text: 'Nasal cavity', at: [HEAD_X - 0.05, 0.2, 0.72], side: 'left', near: 8 },
+    { text: 'Zoomed-in lining', parent: nose.markerAnchor, near: 8 },
+    { text: 'Swollen lining', at: [HEAD_X - 0.12, 0.0, 0.2], side: 'left', near: 8, when: (s) => s > 0.5 },
   ];
 
   const dummy = new THREE.Object3D();
 
   function update(t, dt, s) {
+    nose.update(t, s);
     const swell = smoothstep(0.35, 0.9, s);
     // Tissue swelling lifts the lining.
     // Bottom stays at -LP while the top rises by `lift`.
@@ -385,10 +396,11 @@ export default function build() {
       exposure: 0.95,
       envIntensity: 0.35,
       bloom: { strength: 0.12, threshold: 0.98, radius: 0.4 },
-      lights: { hemi: 0.35, sky: '#ffe9e4', ground: '#3a1414', key: 2.2, keyPos: [3, 9, 6], shadowSize: 6.5, rim: 1.6, rimColor: '#a5c8ff', rimPos: [-6, 4, -7], fill: 3, fillColor: '#ff8a7a', fillPos: [0, -0.5, 4], head: 0.25 },
+      lights: { hemi: 0.35, sky: '#ffe9e4', ground: '#3a1414', key: 2.2, keyPos: [3, 9, 6], shadowSize: 6.5, rim: 0.9, rimColor: '#a5c8ff', rimPos: [-6, 4, -7], fill: 1.5, fillColor: '#ff8a7a', fillPos: [0, -0.5, 4], head: 0.25 },
     },
     controls: { minDistance: 2, maxDistance: 22 },
     views: {
+      head: { pos: [HEAD_X + 3.4, 0.35, 1.9], target: [HEAD_X, -0.2, 0.25] },
       overview: { pos: [6.2, 4.2, 8.4], target: [0, 0.1, 0] },
       close: { pos: [1.6, 2.1, 3.6], target: [0.4, 0.75, 0.6] },
       vessel: { pos: [-3.2, 0.9, 5.6], target: [-0.8, -0.2, 0.6] },

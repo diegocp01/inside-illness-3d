@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { surfaceNets, sdf } from '../engine/shapes.js';
+import { surfaceNets, cutByPlane, sdf } from '../engine/shapes.js';
 import { tissue } from '../engine/materials.js';
 import { smoothstep } from '../engine/noise.js';
 
@@ -59,15 +59,9 @@ export function gumSDF(x, y, z) {
 }
 export { BONE_TOP };
 
-/** Polygonise a half (z <= offset) of an SDF and tag cut-face vertices (aCut = 1). */
+/** Polygonise an SDF, then slice it exactly at z = offset (keeping z <= offset) and cap it (aCut = 1 on the cap). */
 export function halfMesh(fn, offset, bounds, res) {
-  const cut = (x, y, z) => Math.max(fn(x, y, z), z - offset);
-  const g = surfaceNets(cut, bounds[0], bounds[1], res);
-  const p = g.attributes.position, n = g.attributes.normal;
-  const flag = new Float32Array(p.count);
-  for (let i = 0; i < p.count; i++) flag[i] = Math.abs(p.getZ(i) - offset) < 0.004 && n.getZ(i) > 0.8 ? 1 : 0;
-  g.setAttribute('aCut', new THREE.BufferAttribute(flag, 1));
-  return g;
+  return cutByPlane(surfaceNets(fn, bounds[0], bounds[1], res), 'z', offset, true);
 }
 
 /**
@@ -171,7 +165,7 @@ export function makeToothUniforms() {
   };
 }
 
-const TB = [[-0.72, -2.08, -0.62], [0.72, 1.12, 0.03]];
+const TB = [[-0.72, -2.08, -0.62], [0.72, 1.12, 0.06]];
 export function buildTooth(U, res = 140) {
   const group = new THREE.Group();
   const outer = new THREE.Mesh(
@@ -204,7 +198,7 @@ export function buildTooth(U, res = 140) {
   return { group, outer, dentin, pulp };
 }
 
-const GB = [[-1.4, -2.55, -1.1], [1.4, 0.32, 0.03]];
+const GB = [[-1.4, -2.55, -1.1], [1.4, 0.32, 0.06]];
 export function buildGumBone(U0, { gumRes = 96, boneRes = 96 } = {}) {
   // Gum and bone never show decay, so they get their own zeroed cavity uniforms.
   const U = { ...U0, uCavR: { value: 0 }, uStain: { value: 0 }, uChalk: { value: 0 } };

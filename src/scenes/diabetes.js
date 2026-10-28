@@ -3,6 +3,7 @@ import { tissue } from '../engine/materials.js';
 import { redCellGeometry, mergeGeometries, displace } from '../engine/shapes.js';
 import { tubeLayer } from '../engine/tube.js';
 import { noise, rng, smoothstep, lerp, clamp } from '../engine/noise.js';
+import { buildContext } from './context.js';
 
 // Type 2 diabetes: insulin keys, receptor locks and GLUT4 doors on a body cell next to a blood vessel.
 export default function build() {
@@ -108,6 +109,12 @@ export default function build() {
   const ks = Array.from({ length: KN }, (_, i) => ({ spot: i % spots.length, ph: r(), k: i / KN, rot: r() * 6 }));
   root.add(keys);
 
+  // ---------- Context: where in the body this close-up is ----------
+  const CTX_X = -40;
+  const ctx = buildContext('diabetes');
+  ctx.group.position.x = CTX_X;
+  root.add(ctx.group);
+
   // ---------- Labels ----------
   const lGlu = new THREE.Object3D(), lKey = new THREE.Object3D();
   root.add(lGlu, lKey);
@@ -120,12 +127,14 @@ export default function build() {
     { text: 'Stuck lock', at: s0.dock.toArray(), side: 'left', when: (s) => s >= 0.6 },
     { text: 'Door', at: s0.doorPos.toArray() },
   ];
+  labels.push(...ctx.labels);
 
   const tc = new THREE.Color();
   const vesselPoint = (x, rr, a, out) => out.set(x, VY + Math.cos(a) * rr * VR, Math.sin(a) * rr * VR);
   let absorbed = 0;
 
   function update(t, dt, s) {
+    ctx.update(t, s);
     U.uTime.value = t;
     U.uSick.value = s;
     dt = Math.min(dt, 0.05);
@@ -283,7 +292,9 @@ export default function build() {
       lights: { hemi: 0.4, sky: '#f0eaff', ground: '#2a1520', key: 2.4, keyPos: [3, 9, 6], shadowSize: 7, rim: 1.8, rimColor: '#9fd0ff', rimPos: [-6, 3, -6], fill: 3, fillColor: '#ffb28a', fillPos: [0, 1, 4] },
     },
     controls: { minDistance: 1.5, maxDistance: 20 },
+    labelNear: 26,
     views: {
+      context: { pos: [CTX_X + ctx.view.pos[0], ctx.view.pos[1], ctx.view.pos[2]], target: [CTX_X + ctx.view.target[0], ctx.view.target[1], ctx.view.target[2]] },
       overview: { pos: [1.0, 3.6, 10.5], target: [0, 0.9, 0] },
       close: { pos: [1.6, 1.4, 4.2], target: [0.4, 0.1, 0.2] },
     },
