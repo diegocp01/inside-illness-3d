@@ -15,7 +15,7 @@ export default function build() {
     { h: 0.32, color: '#f3d2c4', name: 'submucosa' },
     { h: 0.42, color: '#b8463f', name: 'muscle' },
   ];
-  let y0 = 0;
+  let y0 = -0.05; // keep the slab below the bumpy mucosa surface so they never overlap
   for (const L of layers) {
     const g = new THREE.BoxGeometry(W, L.h, D, 1, 1, 1);
     g.translate(0, y0 - L.h / 2, 0);

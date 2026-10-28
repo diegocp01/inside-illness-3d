@@ -19,7 +19,7 @@ export default function build() {
   root.add(lp);
   // Base plate so the slab reads as a solid specimen.
   const base = new THREE.Mesh(new RoundedBoxGeometry(W + 0.1, 0.12, D + 0.1, 2, 0.05), tissue({ color: '#9a4a48', roughness: 0.6, clearcoat: 0.2 }));
-  base.position.y = -LP - 0.06;
+  base.position.y = -LP - 0.075; // top sits just below the tissue block, never in the same plane
   base.receiveShadow = true;
   root.add(base);
 
@@ -63,7 +63,7 @@ export default function build() {
   const NX = 32, NZ = 16;
   const pitch = W / NX;
   const cellGeo = new RoundedBoxGeometry(pitch * 0.9, cellH, pitch * 0.9, 2, 0.05);
-  cellGeo.translate(0, cellH / 2, 0);
+  cellGeo.translate(0, cellH / 2 + 0.006, 0); // tiny lift so cell bottoms don't share a plane with the tissue top
   const cellMat = tissue({ color: '#ffffff', sheen: '#ffd0c8', roughness: 0.42, clearcoat: 0.3, normal: 'organic', normalScale: 0.25 });
   const cells = new THREE.InstancedMesh(cellGeo, cellMat, NX * NZ);
   cells.castShadow = true;
