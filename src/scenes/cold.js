@@ -2,7 +2,8 @@ import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { tissue, membrane, glowPoints } from '../engine/materials.js';
 import { virusGeometry, whiteCellGeometry, redCellGeometry, smoothSphere } from '../engine/shapes.js';
-import { noise, rng, smoothstep, lerp, clamp } from '../engine/noise.js';
+import { noise, rng, smoothstep, lerp } from '../engine/noise.js';
+import { buildNoseHead } from './noseHead.js';
 
 // Common cold: a slab of nasal lining — cilia, mucus, lining cells, and blood vessels beneath.
 export default function build() {
@@ -228,18 +229,29 @@ export default function build() {
   const lblVirus = new THREE.Object3D(), lblWbc = new THREE.Object3D(), lblInf = new THREE.Object3D(), lblMucus = new THREE.Object3D();
   upper.add(lblVirus, lblInf, lblMucus);
   root.add(lblWbc);
+  // ---------- Context: a half head showing where this lining is ----------
+  const HEAD_X = -40;
+  const nose = buildNoseHead();
+  nose.group.position.x = HEAD_X;
+  root.add(nose.group);
+
+  const near = 20;
   const labels = [
-    { text: 'Mucus', parent: lblMucus },
-    { text: 'Cilia', at: [2.6, cellH + 0.16, D / 2], parent: upper },
-    { text: 'Vessel', at: [2.2, -0.62 + 0.18, 1.05], when: (s) => s < 0.5 },
-    { text: 'Swollen vessel', at: [2.2, -0.62 + 0.3, 1.05], when: (s) => s >= 0.5 },
-    { text: 'Virus', parent: lblVirus, when: (s) => s > 0.2 && s < 0.95 },
-    { text: 'White cells', parent: lblWbc, when: (s) => s > 0.7 },
+    { text: 'Mucus', parent: lblMucus, near },
+    { text: 'Cilia', at: [2.6, cellH + 0.16, D / 2], parent: upper, near },
+    { text: 'Vessel', at: [2.2, -0.62 + 0.18, 1.05], when: (s) => s < 0.5, near },
+    { text: 'Swollen vessel', at: [2.2, -0.62 + 0.3, 1.05], when: (s) => s >= 0.5, near },
+    { text: 'Virus', parent: lblVirus, when: (s) => s > 0.2 && s < 0.95, near },
+    { text: 'White cells', parent: lblWbc, when: (s) => s > 0.7, near },
+    { text: 'Nasal cavity', at: [HEAD_X - 0.05, 0.2, 0.72], side: 'left', near: 8 },
+    { text: 'Zoomed-in lining', parent: nose.markerAnchor, near: 8 },
+    { text: 'Swollen lining', at: [HEAD_X - 0.12, 0.0, 0.2], side: 'left', near: 8, when: (s) => s > 0.5 },
   ];
 
   const dummy = new THREE.Object3D();
 
   function update(t, dt, s) {
+    nose.update(t, s);
     const swell = smoothstep(0.35, 0.9, s);
     // Tissue swelling lifts the lining.
     // Bottom stays at -LP while the top rises by `lift`.
@@ -389,6 +401,7 @@ export default function build() {
     },
     controls: { minDistance: 2, maxDistance: 22 },
     views: {
+      head: { pos: [HEAD_X + 3.4, 0.35, 1.9], target: [HEAD_X, -0.2, 0.25] },
       overview: { pos: [6.2, 4.2, 8.4], target: [0, 0.1, 0] },
       close: { pos: [1.6, 2.1, 3.6], target: [0.4, 0.75, 0.6] },
       vessel: { pos: [-3.2, 0.9, 5.6], target: [-0.8, -0.2, 0.6] },

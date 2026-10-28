@@ -20,10 +20,12 @@ export const illnesses = [
     facts: ['Rhinoviruses cause roughly 30–50% of colds.', 'Adults catch about 2–3 colds a year.'],
     sickLabel: 'With a cold',
     steps: [
-      { title: 'Healthy nose', text: 'Tiny hairs (cilia) sweep sticky mucus and germs away.', sick: 0, view: 'overview' },
+      { title: 'Inside the nose', text: 'The glowing square marks the lining we zoom into.', sick: 0, view: 'head' },
+      { title: 'Healthy lining', text: 'Tiny hairs (cilia) sweep sticky mucus and germs away.', sick: 0, view: 'overview' },
       { title: 'Virus lands', text: 'Rhinoviruses latch onto lining cells and get inside.', sick: 0.3, view: 'close' },
       { title: 'Stuffy nose', text: 'Blood vessels widen and leak, so the lining swells.', sick: 0.6, view: 'vessel' },
       { title: 'Runny nose', text: 'Extra mucus flushes the virus out.', sick: 1, view: 'overview' },
+      { title: 'Whole nose', text: 'Swollen lining blocks the airway: a stuffy nose.', sick: 1, view: 'head' },
       { title: 'Recovery', text: 'About a week later, it’s back to normal.', sick: 0, view: 'wide' },
     ],
     readout: (s) => ({ label: 'Stage', value: s < 0.15 ? 'Healthy' : s < 0.45 ? 'Day 1' : s < 0.8 ? 'Day 2' : 'Peak', tone: s < 0.15 ? 'good' : s < 0.6 ? 'warn' : 'bad' }),
